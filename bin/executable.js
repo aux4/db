@@ -8,41 +8,50 @@ const QUERY_HELP = {
   variables: [
     {
       name: "configFile",
-      text: "Configuration file"
+      text: "Configuration file",
+      default: ""
     },
     {
       name: "config",
-      text: "Configuration name"
+      text: "Configuration name",
+      default: ""
     },
     {
       name: "module",
-      text: "Database module"
+      text: "Database module",
+      default: ""
     },
     {
       name: "type",
-      text: "Database vendor"
+      text: "Database vendor",
+      default: ""
     },
     {
       name: "host",
-      text: "Database host"
+      text: "Database host",
+      default: ""
     },
     {
       name: "port",
-      text: "Database port"
+      text: "Database port",
+      default: ""
     },
     {
       name: "user",
       text: "Database user",
+      default: "",
       hide: true
     },
     {
       name: "password",
       text: "Database password",
+      default: "",
       hide: true
     },
     {
       name: "database",
-      text: "Database name"
+      text: "Database name",
+      default: ""
     },
     {
       name: "query",
