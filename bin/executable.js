@@ -56,6 +56,10 @@ const QUERY_HELP = {
     {
       name: "query",
       text: "SQL query to execute"
+    },
+    {
+      name: "file",
+      text: "SQL file to execute"
     }
   ]
 };
