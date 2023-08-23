@@ -15,12 +15,10 @@ async function queryExecutor(params) {
     const result = await DatabaseQueryExecutor.executeQuery(dbConfig, sql, queryParams);
     console.log(JSON.stringify(result, null, 2));
   } else {
-    const jsonPath = await params.jsonPath;
-
     const executeQueryStream = new DatabaseStreamTransformer(dbConfig, sql, queryParams);
     await executeQueryStream.open();
 
-    readJsonInputStream(jsonPath).pipe(executeQueryStream).pipe(process.stdout);
+    readJsonInputStream().pipe(executeQueryStream).pipe(process.stdout);
   }
 }
 

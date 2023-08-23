@@ -55,11 +55,13 @@ const QUERY_HELP = {
     },
     {
       name: "query",
-      text: "SQL query to execute"
+      text: "SQL query to execute",
+      default: ""
     },
     {
       name: "file",
-      text: "SQL file to execute"
+      text: "SQL file to execute",
+      default: ""
     }
   ]
 };

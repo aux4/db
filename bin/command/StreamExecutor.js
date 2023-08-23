@@ -15,12 +15,10 @@ async function streamExecutor(params) {
   if (process.stdin.isTTY) {
     await DatabaseQueryStream.stream(dbConfig, sql, queryParams);
   } else {
-    const jsonPath = await params.jsonPath;
-
     const executeQueryStream = new DatabaseStreamTransformer(dbConfig, sql, queryParams, true);
     await executeQueryStream.open();
 
-    readJsonInputStream(jsonPath).pipe(executeQueryStream).pipe(process.stdout);
+    readJsonInputStream().pipe(executeQueryStream).pipe(process.stdout);
   }
 }
 
