@@ -62,6 +62,11 @@ const QUERY_HELP = {
       name: "file",
       text: "SQL file to execute",
       default: ""
+    },
+    {
+      name: "errorOutput",
+      text: "Path of error output file. If not provided it will output to stderr",
+      default: ""
     }
   ]
 };
