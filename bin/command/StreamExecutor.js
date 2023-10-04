@@ -9,10 +9,11 @@ async function streamExecutor(params) {
 
   const file = await params.file;
   const query = await params.query;
-
   const sql = await getQuery(file, query);
+  const inputStreamParam = await params.inputStream;
+  const inputStream = inputStreamParam === true || inputStreamParam === "true";
 
-  if (process.stdin.isTTY) {
+  if (inputStream) {
     await DatabaseQueryStream.stream(dbConfig, sql, queryParams);
   } else {
     const executeQueryStream = new DatabaseStreamTransformer(dbConfig, sql, queryParams, true);

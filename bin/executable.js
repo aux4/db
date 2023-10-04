@@ -4,6 +4,8 @@ const { Engine } = require("@aux4/engine");
 const { queryExecutor } = require("./command/QueryExecutor");
 const { streamExecutor } = require("./command/StreamExecutor");
 
+process.title = "aux4-db";
+
 const QUERY_HELP = {
   variables: [
     {
@@ -64,9 +66,9 @@ const QUERY_HELP = {
       default: ""
     },
     {
-      name: "errorOutput",
-      text: "Path of error output file. If not provided it will output to stderr",
-      default: ""
+      name: "inputStream",
+      text: "Read JSON input from stdin",
+      default: "false"
     }
   ]
 };
