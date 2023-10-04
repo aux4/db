@@ -14,12 +14,12 @@ async function streamExecutor(params) {
   const inputStream = inputStreamParam === true || inputStreamParam === "true";
 
   if (inputStream) {
-    await DatabaseQueryStream.stream(dbConfig, sql, queryParams);
-  } else {
     const executeQueryStream = new DatabaseStreamTransformer(dbConfig, sql, queryParams, true);
     await executeQueryStream.open();
 
     readJsonInputStream().pipe(executeQueryStream).pipe(process.stdout);
+  } else {
+    await DatabaseQueryStream.stream(dbConfig, sql, queryParams);
   }
 }
 

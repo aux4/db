@@ -14,13 +14,13 @@ async function queryExecutor(params) {
   const inputStream = inputStreamParam === true || inputStreamParam === "true";
 
   if (inputStream) {
-    const result = await DatabaseQueryExecutor.executeQuery(dbConfig, sql, queryParams);
-    console.log(JSON.stringify(result, null, 2));
-  } else {
     const executeQueryStream = new DatabaseStreamTransformer(dbConfig, sql, queryParams);
     await executeQueryStream.open();
 
     readJsonInputStream().pipe(executeQueryStream).pipe(process.stdout);
+  } else {
+    const result = await DatabaseQueryExecutor.executeQuery(dbConfig, sql, queryParams);
+    console.log(JSON.stringify(result, null, 2));
   }
 }
 
