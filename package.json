@@ -1,6 +1,6 @@
 {
   "name": "@aux4/db",
-  "version": "1.0.16",
+  "version": "1.0.17",
   "description": "Database CLI",
   "main": "index.js",
   "preferGlobal": true,
