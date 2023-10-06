@@ -5,7 +5,7 @@ const { createDatabaseConfig, getQueryParams } = require("../util/DatabaseUtils"
 
 async function streamExecutor(params) {
   const dbConfig = await createDatabaseConfig(params);
-  const queryParams = await getQueryParams(dbConfig, params);
+  const queryParams = await getQueryParams(dbConfig, params.$params);
 
   const file = await params.file;
   const query = await params.query;
