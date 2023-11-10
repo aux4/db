@@ -26,7 +26,7 @@
   },
   "homepage": "https://github.com/aux4/db#readme",
   "dependencies": {
-    "@aux4/engine": "^1.0.39",
+    "@aux4/engine": "1.0.39",
     "JSONStream": "^1.3.5"
   }
 }
