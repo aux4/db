@@ -1,14 +1,4 @@
-const { ConfigLoader } = require("@aux4/config");
-
 async function createDatabaseConfig(params) {
-  const configFile = await params.configFile;
-  const configName = await params.config;
-
-  if (configName || configFile) {
-    const config = ConfigLoader.load(configFile);
-    return config.get(configName);
-  }
-
   return {
     module: await params.module,
     type: await params.type,
