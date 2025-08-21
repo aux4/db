@@ -1,0 +1,26 @@
+{
+  "scope": "aux4",
+  "name": "db",
+  "version": "1.0.0",
+  "description": "Database tools for managing and interacting with the database.",
+  "tags": [
+    "db",
+    "database"
+  ],
+  "profiles": [
+    {
+      "name": "main",
+      "commands": [
+        {
+          "name": "db",
+          "execute": [
+            "profile:db"
+          ],
+          "help": {
+            "text": "Database tools"
+          }
+        }
+      ]
+    }
+  ]
+}
