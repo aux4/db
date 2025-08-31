@@ -39,10 +39,15 @@ This is a database scaffold for creating custom database command-line interfaces
       "commands": [
         {
           "name": "execute",
-          "execute": ["<command to execute a query>"],
+          "execute": [
+            "aux4 db driver execute values(query, file, inputStream, tx, *) | <command to execute a query> values(<db params>)"
+          ],
           "help": {
             "text": "Execute a query on the <database name> database",
             "variables": [
+              {
+                <db variables>
+              },
               {
                 "name": "query",
                 "text": "SQL query to execute",
@@ -57,16 +62,26 @@ This is a database scaffold for creating custom database command-line interfaces
                 "name": "inputStream",
                 "text": "Read JSON input from stdin",
                 "default": "false"
+              },
+              {
+                "name": "tx",
+                "text": "Execute the query in a transaction",
+                "default": "false"
               }
             ]
           }
         },
         {
           "name": "stream",
-          "execute": ["<command to execute a query>"],
+          "execute": [
+            "stdin:aux4 db driver stream values(query, file, inputStream, tx, *) | <command to stream a query> values(<db params>)"
+          ],
           "help": {
             "text": "Execute a query on the <database name> database and stream results",
             "variables": [
+              {
+                <db variables>
+              },
               {
                 "name": "query",
                 "text": "SQL query to execute",
@@ -80,6 +95,11 @@ This is a database scaffold for creating custom database command-line interfaces
               {
                 "name": "inputStream",
                 "text": "Read JSON input from stdin",
+                "default": "false"
+              },
+              {
+                "name": "tx",
+                "text": "Execute the query in a transaction",
                 "default": "false"
               }
             ]
@@ -97,15 +117,18 @@ You can also include the variables required to connect to the database in the `e
 ...
       {
         "name": "host",
-        "text": "Database host"
+        "text": "Database host",
+        "default": "localhost"
       },
       {
         "name": "port",
-        "text": "Database port"
+        "text": "Database port",
+        "default": "<default port>"
       },
       {
         "name": "user",
-        "text": "Database user"
+        "text": "Database user",
+        "default": "<default user>"
       },
       {
         "name": "password",
@@ -113,7 +136,8 @@ You can also include the variables required to connect to the database in the `e
       },
       {
         "name": "database",
-        "text": "Database name"
+        "text": "Database name",
+        "default": "<default database>"
       }
 ...
 ```

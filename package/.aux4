@@ -1,7 +1,7 @@
 {
   "scope": "aux4",
   "name": "db",
-  "version": "1.1.0",
+  "version": "1.1.0-local",
   "description": "Database tools for managing and interacting with the database.",
   "tags": [
     "db",
@@ -18,6 +18,58 @@
           ],
           "help": {
             "text": "Database tools"
+          }
+        }
+      ]
+    },
+    {
+      "name": "db",
+      "commands": [
+        {
+          "name": "driver",
+          "private": true,
+          "execute": [
+            "stdin:${packageDir}/aux4-db values(action, query, file, inputStream, tx, ignore, params)"
+          ],
+          "help": {
+            "text": "Database driver command",
+            "variables": [
+              {
+                "name": "action",
+                "text": "Action to perform (e.g., execute, stream)",
+                "arg": true
+              },
+              {
+                "name": "query",
+                "text": "SQL query to execute",
+                "default": ""
+              },
+              {
+                "name": "file",
+                "text": "SQL file to execute",
+                "default": ""
+              },
+              {
+                "name": "inputStream",
+                "text": "Read JSON input from stdin",
+                "default": "false"
+              },
+              {
+                "name": "tx",
+                "text": "Execute within a transaction",
+                "default": "false"
+              },
+              {
+                "name": "ignore",
+                "text": "Ignore errors and continue processing",
+                "default": "false"
+              },
+              {
+                "name": "params",
+                "text": "Additional query parameters",
+                "default": "{}"
+              }
+            ]
           }
         }
       ]
