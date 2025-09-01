@@ -40,7 +40,7 @@ This is a database scaffold for creating custom database command-line interfaces
         {
           "name": "execute",
           "execute": [
-            "aux4 db driver execute values(query, file, inputStream, tx, *) | <command to execute a query> values(<db params>)"
+            "stdin:aux4 db driver stream params(query, file, inputStream, tx, ignore) --params value(*) | <command to execute a query> values(<db params>)"
           ],
           "help": {
             "text": "Execute a query on the <database name> database",
@@ -67,6 +67,11 @@ This is a database scaffold for creating custom database command-line interfaces
                 "name": "tx",
                 "text": "Execute the query in a transaction",
                 "default": "false"
+              },
+              {
+                "name": "ignore",
+                "text": "Ignore errors and continue processing",
+                "default": "false"
               }
             ]
           }
@@ -74,7 +79,7 @@ This is a database scaffold for creating custom database command-line interfaces
         {
           "name": "stream",
           "execute": [
-            "stdin:aux4 db driver stream values(query, file, inputStream, tx, *) | <command to stream a query> values(<db params>)"
+            "stdin:aux4 db driver stream params(query, file, inputStream, tx, ignore) --params value(*) | <command to stream a query> values(<db params>)"
           ],
           "help": {
             "text": "Execute a query on the <database name> database and stream results",
@@ -100,6 +105,11 @@ This is a database scaffold for creating custom database command-line interfaces
               {
                 "name": "tx",
                 "text": "Execute the query in a transaction",
+                "default": "false"
+              },
+              {
+                "name": "ignore",
+                "text": "Ignore errors and continue processing",
                 "default": "false"
               }
             ]
