@@ -1,4 +1,4 @@
-# aux4 db driver - Basic Tests
+# aux4 db driver prepare - Basic Tests
 
 ## basic execute with named parameters
 
@@ -11,7 +11,7 @@
         {
           "name": "test-execute",
           "execute": [
-            "aux4 db driver --action execute --query \"select 1 from table where name = :name\" --params value(*)"
+            "aux4 db driver prepare --action execute --query \"select 1 from table where name = :name\" --params value(*)"
           ],
           "help": {
             "text": "test basic execute command"
@@ -42,7 +42,7 @@ aux4 test-execute --name david
         {
           "name": "test-multi-params",
           "execute": [
-            "aux4 db driver --action execute --query 'select * from users where name = :name and age = :age' --params value(*)"
+            "aux4 db driver prepare --action execute --query 'select * from users where name = :name and age = :age' --params value(*)"
           ],
           "help": {
             "text": "test execute with multiple parameters"
@@ -73,7 +73,7 @@ aux4 test-multi-params --name john --age 25
         {
           "name": "test-ignore",
           "execute": [
-            "aux4 db driver --action execute --query \"select 1 from table where name = :name\" --params value(*) --ignore true"
+            "aux4 db driver prepare --action execute --query \"select 1 from table where name = :name\" --params value(*) --ignore true"
           ],
           "help": {
             "text": "test execute with ignore flag"
@@ -104,7 +104,7 @@ aux4 test-ignore --name david
         {
           "name": "test-no-params",
           "execute": [
-            "aux4 db driver --action execute --query \"select 1 from dual\""
+            "aux4 db driver prepare --action execute --query \"select 1 from dual\""
           ],
           "help": {
             "text": "test execute without parameters"

@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"regexp"
 	"strconv"
 	"strings"
 )
@@ -102,52 +103,78 @@ func (om *OrderedMap) UnmarshalJSON(data []byte) error {
 
 func main() {
 	args := os.Args[1:]
-	if len(args) < 2 || (args[0] != "execute" && args[0] != "stream") {
-		fmt.Fprintf(os.Stderr, "Usage: preprocessor.js <execute|stream> <query> <file> <inputStream> <tx> <ignore> <params>\n")
+	if len(args) < 2 {
+		fmt.Fprintf(os.Stderr, "Usage: aux4-db <command> <args...>\n")
+		fmt.Fprintf(os.Stderr, "Commands: prepare|sql-bind\n")
 		os.Exit(1)
 	}
-	
-	action := args[0]
-	query := args[1]
+
+	command := args[0]
+
+	// Handle sql-bind command
+	if command == "sql-bind" {
+		handleSqlBinder(args)
+		return
+	}
+
+	// Handle prepare command
+	if command == "prepare" {
+		handlePrepare(args)
+		return
+	}
+
+	fmt.Fprintf(os.Stderr, "Invalid command: %s. Supported commands: prepare, sql-bind\n", command)
+	os.Exit(1)
+}
+
+func handlePrepare(args []string) {
+	if len(args) < 3 {
+		fmt.Fprintf(os.Stderr, "Usage: aux4-db prepare <action> <query> [file] [inputStream] [tx] [ignore] [params] [key value...]\n")
+		os.Exit(1)
+	}
+
+	action := args[1]
+
+	// Validate action
+	if action != "execute" && action != "stream" {
+		fmt.Fprintf(os.Stderr, "Invalid action: %s. Supported actions: execute, stream\n", action)
+		os.Exit(1)
+	}
+
+	query := args[2]
 	file := ""
 	inputStream := false
 	tx := false
 	ignore := false
 	params := NewOrderedMap()
-	
-	if len(args) > 2 {
-		file = args[2]
-	}
+
 	if len(args) > 3 {
-		inputStream = args[3] == "true"
+		file = args[3]
 	}
 	if len(args) > 4 {
-		tx = args[4] == "true"
+		inputStream = args[4] == "true"
 	}
 	if len(args) > 5 {
-		ignore = args[5] == "true"
+		tx = args[5] == "true"
 	}
 	if len(args) > 6 {
-		json.Unmarshal([]byte(args[6]), params)
+		ignore = args[6] == "true"
 	}
-	
+	if len(args) > 7 {
+		json.Unmarshal([]byte(args[7]), params)
+	}
+
 	// Process additional key-value arguments
-	for i := 7; i < len(args); i += 2 {
+	for i := 8; i < len(args); i += 2 {
 		if i+1 >= len(args) {
 			break // Ensure we have pairs
 		}
 		key, value := args[i], args[i+1]
-		if value == "true" {
-			params.Set(key, true)
-		} else if value == "false" {
-			params.Set(key, false)
-		} else if num, err := strconv.ParseFloat(value, 64); err == nil {
-			params.Set(key, num)
-		} else {
-			params.Set(key, value)
-		}
+		// Parse value based on context and action
+		parsedValue := parseParameterValue(value, action)
+		params.Set(key, parsedValue)
 	}
-	
+
 	// Get SQL
 	sql := query
 	if sql == "" && file != "" {
@@ -162,7 +189,7 @@ func main() {
 		fmt.Fprintf(os.Stderr, "Either query or file parameter must be provided\n")
 		os.Exit(1)
 	}
-	
+
 	if inputStream {
 		processInputStream(action, sql, params, tx, ignore)
 	} else {
@@ -329,4 +356,163 @@ func outputStreamBatch(sql string, params *OrderedMap, items []*OrderedMap, useT
 	result.Set("tx", useTx)
 	result.Set("ignore", ignore)
 	json.NewEncoder(os.Stdout).Encode(result)
+}
+
+func handleSqlBinder(args []string) {
+	if len(args) < 3 {
+		fmt.Fprintf(os.Stderr, "Usage: aux4-db sql-bind <query> <params_json> [key value...]\\n")
+		os.Exit(1)
+	}
+
+	query := args[1]
+	paramsJSON := args[2]
+
+	// Parse base parameters from JSON
+	var baseParams map[string]interface{}
+	if paramsJSON != "" {
+		if err := json.Unmarshal([]byte(paramsJSON), &baseParams); err != nil {
+			fmt.Fprintf(os.Stderr, "Error parsing params JSON: %v\\n", err)
+			os.Exit(1)
+		}
+	} else {
+		baseParams = make(map[string]interface{})
+	}
+
+	// Process additional key-value arguments starting from index 3
+	for i := 3; i < len(args); i += 2 {
+		if i+1 >= len(args) {
+			break // Ensure we have pairs
+		}
+		key, value := args[i], args[i+1]
+		// Parse value for sql-bind
+		parsedValue := parseParameterValue(value, "sql-bind")
+		baseParams[key] = parsedValue
+	}
+
+	// Parse and replace parameters in the query
+	parsedQuery, err := parseQuery(query, baseParams)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error parsing query: %v\\n", err)
+		os.Exit(1)
+	}
+
+	fmt.Print(parsedQuery)
+}
+
+func parseParameterValue(value string, action string) interface{} {
+	// For sql-bind action, be more aggressive about type conversion
+	if action == "sql-bind" {
+		// Handle null
+		if value == "null" {
+			return nil
+		}
+		// Handle booleans
+		if value == "true" {
+			return true
+		}
+		if value == "false" {
+			return false
+		}
+		// Handle JSON arrays
+		if strings.HasPrefix(value, "[") && strings.HasSuffix(value, "]") {
+			var arr []interface{}
+			if err := json.Unmarshal([]byte(value), &arr); err == nil {
+				return arr
+			}
+		}
+		// Handle numbers
+		if num, err := strconv.ParseFloat(value, 64); err == nil {
+			// Check if it's actually an integer
+			if num == float64(int64(num)) {
+				return int64(num)
+			}
+			return num
+		}
+	} else {
+		// For other actions, use simpler logic
+		if value == "true" {
+			return true
+		} else if value == "false" {
+			return false
+		} else if num, err := strconv.ParseFloat(value, 64); err == nil {
+			return num
+		}
+	}
+	return value
+}
+
+func parseQuery(query string, params map[string]interface{}) (string, error) {
+	// Regular expression to find named parameters like :name, :age, etc.
+	paramRegex := regexp.MustCompile(`:(\w+)`)
+
+	// Find all parameter names in the query
+	matches := paramRegex.FindAllStringSubmatch(query, -1)
+	paramNames := make(map[string]bool)
+	for _, match := range matches {
+		paramNames[match[1]] = true
+	}
+
+	// Check for missing parameters
+	for paramName := range paramNames {
+		if _, exists := params[paramName]; !exists {
+			return "", fmt.Errorf("missing parameter: %s", paramName)
+		}
+	}
+
+	// Replace each parameter with its safely quoted value
+	result := query
+	for paramName, value := range params {
+		placeholder := ":" + paramName
+		if strings.Contains(result, placeholder) {
+			quotedValue := quoteValue(value)
+			result = strings.ReplaceAll(result, placeholder, quotedValue)
+		}
+	}
+
+	return result, nil
+}
+
+func quoteValue(value interface{}) string {
+	switch v := value.(type) {
+	case nil:
+		return "NULL"
+	case bool:
+		if v {
+			return "TRUE"
+		}
+		return "FALSE"
+	case int:
+		return strconv.Itoa(v)
+	case int64:
+		return strconv.FormatInt(v, 10)
+	case float64:
+		return strconv.FormatFloat(v, 'f', -1, 64)
+	case string:
+		// Escape single quotes by doubling them (SQL standard)
+		escaped := strings.ReplaceAll(v, "'", "''")
+		return "'" + escaped + "'"
+	case []interface{}:
+		// Handle arrays for IN clauses
+		if len(v) == 0 {
+			return "(NULL)" // Empty array becomes (NULL) for safety
+		}
+		var items []string
+		for _, item := range v {
+			items = append(items, quoteValue(item))
+		}
+		return "(" + strings.Join(items, ", ") + ")"
+	default:
+		// Check if it's a JSON array that wasn't properly parsed
+		if str := fmt.Sprintf("%v", v); strings.HasPrefix(str, "[") && strings.HasSuffix(str, "]") {
+			// Try to parse as JSON array
+			var arr []interface{}
+			if err := json.Unmarshal([]byte(str), &arr); err == nil {
+				return quoteValue(arr)
+			}
+		}
+		// For any other type, convert to string and treat as string
+		str := fmt.Sprintf("%v", v)
+		escaped := strings.ReplaceAll(str, "'", "''")
+		return "'" + escaped + "'"
+	}
 }

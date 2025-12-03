@@ -1,4 +1,4 @@
-# aux4 db driver - Additional Parameters Tests
+# aux4 db driver prepare - Additional Parameters Tests
 
 ## execute with additional key-value parameters
 
@@ -11,7 +11,7 @@
         {
           "name": "test-additional-params",
           "execute": [
-            "aux4 db driver --action execute --query \"select * from users where name = :name and age = :age and active = :active\" --params value(*)"
+            "aux4 db driver prepare --action execute --query \"select * from users where name = :name and age = :age and active = :active\" --params value(*)"
           ],
           "help": {
             "text": "test execute with additional key-value parameters"
@@ -42,7 +42,7 @@ aux4 test-additional-params --name john --age 25 --active true --debug false
         {
           "name": "test-mixed-params",
           "execute": [
-            "aux4 db driver --action execute --query \"select * from products where price \\u003e :minPrice and category = :category and featured = :featured\" --params value(*)"
+            "aux4 db driver prepare --action execute --query \"select * from products where price \\u003e :minPrice and category = :category and featured = :featured\" --params value(*)"
           ],
           "help": {
             "text": "test execute with mixed parameter types"
@@ -73,7 +73,7 @@ aux4 test-mixed-params --category electronics --minPrice 100.5 --featured true -
         {
           "name": "test-stream-additional",
           "execute": [
-            "aux4 db driver --action stream --query \"select * from logs where level = :level and timestamp \\u003e :since\" --params value(*) --ignore true"
+            "aux4 db driver prepare --action stream --query \"select * from logs where level = :level and timestamp \\u003e :since\" --params value(*) --ignore true"
           ],
           "help": {
             "text": "test stream with additional parameters and ignore"

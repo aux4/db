@@ -1,4 +1,4 @@
-# aux4 db driver - Input Stream Tests
+# aux4 db driver prepare - Input Stream Tests
 
 ## execute with input stream (single JSON object)
 
@@ -15,7 +15,7 @@
         {
           "name": "test-input-stream-single",
           "execute": [
-            "cat user-data.json | aux4 db driver --action execute --query \"insert into users (id, name, email) values (:id, :name, :email)\""
+            "cat user-data.json | aux4 db driver prepare --action execute --query \"insert into users (id, name, email) values (:id, :name, :email)\""
           ],
           "help": {
             "text": "test execute with single JSON object input stream"
@@ -53,7 +53,7 @@ aux4 test-input-stream-single
         {
           "name": "test-input-stream-array",
           "execute": [
-            "cat users-array.json | aux4 db driver --action execute --query \"insert into users (id, name, email) values (:id, :name, :email)\""
+            "cat users-array.json | aux4 db driver prepare --action execute --query \"insert into users (id, name, email) values (:id, :name, :email)\""
           ],
           "help": {
             "text": "test execute with JSON array input stream"
@@ -92,7 +92,7 @@ aux4 test-input-stream-array
         {
           "name": "test-stream-input-tx",
           "execute": [
-            "cat log-entries.json | aux4 db driver --action stream --query \"insert into logs (level, message, timestamp) values (:level, :message, :timestamp)\""
+            "cat log-entries.json | aux4 db driver prepare --action stream --query \"insert into logs (level, message, timestamp) values (:level, :message, :timestamp)\""
           ],
           "help": {
             "text": "test stream with input stream and transaction"
@@ -130,7 +130,7 @@ aux4 test-stream-input-tx
         {
           "name": "test-input-stream-base-params",
           "execute": [
-            "cat orders.json | aux4 db driver --action execute --query \"insert into orders (id, amount, user_id, status) values (:order_id, :amount, :user_id, :status)\" --params value(*) --ignore true"
+            "cat orders.json | aux4 db driver prepare --action execute --query \"insert into orders (id, amount, user_id, status) values (:order_id, :amount, :user_id, :status)\" --params value(*) --ignore true"
           ],
           "help": {
             "text": "test execute with input stream, base parameters, and ignore"

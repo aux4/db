@@ -108,6 +108,52 @@ When `ignore` is `true`:
 - Send errors to stderr but continue
 - Exit with zero code if any operations succeeded
 
+## SQL Parameter Binding
+
+The db package provides a SQL parameter binding tool that safely substitutes parameters into SQL queries with built-in SQL injection protection.
+
+### Usage
+
+```bash
+aux4 db driver sql-bind --query "SELECT * FROM users WHERE name = :name AND age = :age" --params '{"name": "john", "age": 25}'
+```
+
+**Output:**
+```sql
+SELECT * FROM users WHERE name = 'john' AND age = 25
+```
+
+### Features
+
+- **SQL Injection Protection**: Automatically escapes single quotes by doubling them (`'` → `''`)
+- **Type Handling**: Properly formats different data types:
+  - Strings: `'quoted'`
+  - Numbers: `25`, `99.99`
+  - Booleans: `TRUE`, `FALSE`
+  - Null values: `NULL`
+- **Array Support**: Converts arrays to IN clause format: `[1,2,3]` → `(1, 2, 3)`
+- **Empty Arrays**: Safe handling: `[]` → `(NULL)`
+
+### Examples
+
+**String with quotes (SQL injection protection):**
+```bash
+aux4 db driver sql-bind --query "SELECT * FROM users WHERE name = :name" --params '{"name": "O'\''Reilly"}'
+# Output: SELECT * FROM users WHERE name = 'O''Reilly'
+```
+
+**IN clause with arrays:**
+```bash
+aux4 db driver sql-bind --query "SELECT * FROM users WHERE id IN :ids" --params '{"ids": [1, 2, 3]}'
+# Output: SELECT * FROM users WHERE id IN (1, 2, 3)
+```
+
+**Mixed types:**
+```bash
+aux4 db driver sql-bind --query "SELECT * FROM orders WHERE user_id = :user_id AND amount > :min_amount AND active = :active" --params '{"user_id": 123, "min_amount": 50.75, "active": true}'
+# Output: SELECT * FROM orders WHERE user_id = 123 AND amount > 50.75 AND active = TRUE
+```
+
 ## How to Create a Custom Database CLI
 
 ```json
@@ -137,7 +183,7 @@ When `ignore` is `true`:
         {
           "name": "execute",
           "execute": [
-            "stdin:aux4 db driver stream params(query, file, inputStream, tx, ignore) --params value(*) | <command to execute a query> values(<db params>)"
+            "stdin:aux4 db driver prepare execute params(query, file, inputStream, tx, ignore) --params value(*) | <command to execute a query> values(<db params>)"
           ],
           "help": {
             "text": "Execute a query on the <database name> database",
@@ -176,7 +222,7 @@ When `ignore` is `true`:
         {
           "name": "stream",
           "execute": [
-            "stdin:aux4 db driver stream params(query, file, inputStream, tx, ignore) --params value(*) | <command to stream a query> values(<db params>)"
+            "stdin:aux4 db driver prepare stream params(query, file, inputStream, tx, ignore) --params value(*) | <command to stream a query> values(<db params>)"
           ],
           "help": {
             "text": "Execute a query on the <database name> database and stream results",

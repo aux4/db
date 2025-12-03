@@ -1,4 +1,4 @@
-# aux4 db driver - File Tests
+# aux4 db driver prepare - File Tests
 
 ## execute with SQL file
 
@@ -18,7 +18,7 @@ order by created_at desc
         {
           "name": "test-file",
           "execute": [
-            "aux4 db driver --action execute --file query.sql --params value(*)"
+            "aux4 db driver prepare --action execute --file query.sql --params value(*)"
           ],
           "help": {
             "text": "test execute with SQL file"
@@ -62,7 +62,7 @@ where ro.order_count > :minOrders
         {
           "name": "test-file-stream",
           "execute": [
-            "aux4 db driver --action stream --file complex-query.sql --params value(*) --ignore true"
+            "aux4 db driver prepare --action stream --file complex-query.sql --params value(*) --ignore true"
           ],
           "help": {
             "text": "test stream with SQL file and ignore"

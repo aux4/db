@@ -1,4 +1,4 @@
-# aux4 db driver - Stream Tests
+# aux4 db driver prepare - Stream Tests
 
 ## basic stream command
 
@@ -11,7 +11,7 @@
         {
           "name": "test-stream",
           "execute": [
-            "aux4 db driver --action stream --query \"select * from users where active = :active\" --params value(*)"
+            "aux4 db driver prepare --action stream --query \"select * from users where active = :active\" --params value(*)"
           ],
           "help": {
             "text": "test basic stream command"
@@ -42,7 +42,7 @@ aux4 test-stream --active true
         {
           "name": "test-stream-ignore",
           "execute": [
-            "aux4 db driver --action stream --query \"select * from logs\" --ignore true"
+            "aux4 db driver prepare --action stream --query \"select * from logs\" --ignore true"
           ],
           "help": {
             "text": "test stream with ignore flag"
@@ -73,7 +73,7 @@ aux4 test-stream-ignore
         {
           "name": "test-stream-complex",
           "execute": [
-            "aux4 db driver --action stream --query \"select * from orders where user_id = :userId and status = :status and created_at > :date\" --params value(*)"
+            "aux4 db driver prepare --action stream --query \"select * from orders where user_id = :userId and status = :status and created_at > :date\" --params value(*)"
           ],
           "help": {
             "text": "test stream with complex parameters"

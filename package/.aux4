@@ -29,10 +29,24 @@
           "name": "driver",
           "private": true,
           "execute": [
-            "stdin:${packageDir}/aux4-db values(action, query, file, inputStream, tx, ignore, params)"
+            "profile:db:driver"
           ],
           "help": {
-            "text": "Database driver command",
+            "text": "Database driver tools"
+          }
+        }
+      ]
+    },
+    {
+      "name": "db:driver",
+      "commands": [
+        {
+          "name": "prepare",
+          "execute": [
+            "stdin:${packageDir}/aux4-db prepare values(action, query, file, inputStream, tx, ignore, params)"
+          ],
+          "help": {
+            "text": "Prepare database operation as JSON for execution",
             "variables": [
               {
                 "name": "action",
@@ -67,6 +81,27 @@
               {
                 "name": "params",
                 "text": "Additional query parameters",
+                "default": "{}"
+              }
+            ]
+          }
+        },
+        {
+          "name": "sql-bind",
+          "execute": [
+            "${packageDir}/aux4-db sql-bind values(query) values(params)"
+          ],
+          "help": {
+            "text": "Bind parameters to SQL query with injection protection",
+            "variables": [
+              {
+                "name": "query",
+                "text": "SQL query with named parameters (e.g., 'SELECT * FROM users WHERE name = :name')",
+                "arg": true
+              },
+              {
+                "name": "params",
+                "text": "Query parameters as JSON or individual flags",
                 "default": "{}"
               }
             ]
