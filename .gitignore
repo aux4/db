@@ -6,5 +6,6 @@ local-test
 out
 
 package/dist
+package/aux4-db
 *.db
 *.zip
