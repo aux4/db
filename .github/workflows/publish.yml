@@ -1,0 +1,81 @@
+name: Publish Package
+
+on:
+  push:
+    branches: [dev]
+    paths: ['**', '!README.md', '!LICENSE']
+  workflow_dispatch:
+    inputs:
+      level:
+        description: Release level
+        required: true
+        default: patch
+        type: choice
+        options: [patch, minor, major]
+
+concurrency:
+  group: publish-package-${{ github.ref_name }}
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+env:
+  AUX4_REGISTRY_URL: ${{ github.ref_name == 'dev' && 'https://dev.api.hub.aux4.io/v1/packages' || '' }}
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-go@v6
+        with:
+          go-version: '1.23.6'
+      - uses: aux4/action@v1
+        with:
+          command: lint
+          strict: 'true'
+          build_command: aux4 builder all
+
+  test:
+    needs: [lint]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-go@v6
+        with:
+          go-version: '1.23.6'
+      - uses: aux4/action@v1
+        with:
+          command: test
+          build_command: aux4 aux4 pkger install aux4/pkger@1.1.55 --force && aux4 builder all
+
+  publish:
+    needs: [lint, test]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-go@v6
+        with:
+          go-version: '1.23.6'
+      - name: Mint dev hub publish token
+        id: devmint
+        env:
+          CLIENT_ID: ${{ secrets.AUX4_DEV_PUBLISHER_CLIENT_ID }}
+          CLIENT_SECRET: ${{ secrets.AUX4_DEV_PUBLISHER_CLIENT_SECRET }}
+        run: |
+          if [ -z "$CLIENT_ID" ] || [ -z "$CLIENT_SECRET" ]; then echo "::error::dev publisher client id/secret not set"; exit 1; fi
+          TOK=$(curl -sf -u "$CLIENT_ID:$CLIENT_SECRET" -d grant_type=client_credentials https://dev.sso.aux4.io/token | jq -r '.access_token // empty')
+          if [ -z "$TOK" ]; then echo "::error::client_credentials mint returned no access_token"; exit 1; fi
+          echo "::add-mask::$TOK"; echo "token=$TOK" >> "$GITHUB_OUTPUT"
+      - uses: aux4/action@v1
+        with:
+          command: publish
+          build_command: aux4 builder all
+          aux4_image: aux4/aux4:dev-publisher
+          level: ${{ inputs.level || 'patch' }}
+          aux4_token: ${{ steps.devmint.outputs.token }}
+          registry: https://dev.api.hub.aux4.io/v1/packages
+          github_token: ${{ secrets.GITHUB_TOKEN }}
